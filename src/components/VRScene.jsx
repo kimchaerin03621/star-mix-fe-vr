@@ -19,7 +19,7 @@ function Stars3D({ starColors }) {
   const meshRef = useRef();
   
   // Load star texture
-  const texture = useLoader(THREE.TextureLoader, '/star.png');
+  const texture = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}star.png`);
   
   // Get controllers for interaction
   const controllers = useXR((state) => state.controllers);
