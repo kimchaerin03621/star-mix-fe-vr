@@ -4,7 +4,8 @@ export function Starfield2D({
   handData, isAudioActive, onMusicReady, 
   activePreset, activeSong, songTrigger, 
   leftRate, rightRate,
-  customTexture, starColors 
+  customTexture, starColors,
+  onCanvasReady
 }) {
   const canvasRef = useRef(null);
   const textureRef = useRef(null);
@@ -53,6 +54,12 @@ export function Starfield2D({
     }
     starsRef.current = newStars;
   }, []);
+
+  useEffect(() => {
+    if (canvasRef.current && onCanvasReady) {
+      onCanvasReady(canvasRef.current);
+    }
+  }, [onCanvasReady]);
 
   // 2. Texture Generation (Handles both Default and Custom)
   useEffect(() => {

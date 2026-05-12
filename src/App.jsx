@@ -2,6 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useHandTracking } from './hooks/useHandTracking';
 import { Starfield2D } from './components/Experience';
 import './index.css';
+import { createXRStore } from '@react-three/xr';
+import { VRScene } from './components/VRScene';
+
+const xrStore = createXRStore({ offerSession: false });
+
+// Workaround for Three.js WebXRManager bug with Emulator
+if (typeof window !== 'undefined') {
+  window.XRWebGLBinding = undefined;
+}
 
 function StarEditor({ onApply, onCancel, previousTexture, previousColors }) {
   const canvasRef = useRef(null);
@@ -235,6 +244,7 @@ function StarEditor({ onApply, onCancel, previousTexture, previousColors }) {
 
 function App() {
   const videoRef = useRef(null);
+  const [sourceCanvas, setSourceCanvas] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
   const [isMusicLoading, setIsMusicLoading] = useState(false);
@@ -311,6 +321,10 @@ function App() {
     <div className="app-container">
       <button className="editor-open-btn" onClick={() => setIsEditorOpen(true)}>
         My Star
+      </button>
+
+      <button className="vr-open-btn" onClick={() => xrStore.enterVR()}>
+        VR Mode
       </button>
 
       {isEditorOpen && (
@@ -393,7 +407,10 @@ function App() {
         rightRate={rightRate}
         customTexture={customTexture}
         starColors={starColors}
+        onCanvasReady={setSourceCanvas}
       />
+
+      <VRScene store={xrStore} starColors={starColors} />
     </div>
   );
 }

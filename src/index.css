@@ -207,6 +207,28 @@ body {
   box-shadow: 0 0 20px rgba(255, 0, 127, 0.5);
 }
 
+.vr-open-btn {
+  position: absolute;
+  top: 20px;
+  left: calc(50% + 80px);
+  background: rgba(0, 255, 127, 0.2);
+  border: 2px solid #00ff7f;
+  color: #00ff7f;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.vr-open-btn:hover {
+  background: #00ff7f;
+  color: black;
+  box-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
+}
+
 .star-editor-modal {
   position: fixed;
   top: 0;
@@ -412,8 +434,8 @@ body {
   height: 100%;
   background: rgba(255, 255, 255, 0.2);
   outline: none;
-  writing-mode: bt-rl; /* Vertical slider support */
-  -webkit-appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
   cursor: pointer;
 }
 
