@@ -161,16 +161,13 @@ function Stars3D({ starColors }) {
         if (dist < interactionRadius) {
           const forceFactor = Math.pow(1 - dist / interactionRadius, 1.5);
           
-          // Web page style interaction (Repel + Swirl) - Halved intensity
-          const repelX = (dx / (dist || 1)) * 0.04;
-          const repelY = (dy / (dist || 1)) * 0.04;
-          const repelZ = (dz / (dist || 1)) * 0.04;
+          // Pure Repel interaction (No Swirl) - Increased intensity slightly
+          const repelX = (dx / (dist || 1)) * 0.06;
+          const repelY = (dy / (dist || 1)) * 0.06;
+          const repelZ = (dz / (dist || 1)) * 0.06;
           
-          const swirlX = (-dy / (dist || 1)) * 0.06;
-          const swirlY = (dx / (dist || 1)) * 0.06;
-          
-          velocities[i3] += (repelX + swirlX) * forceFactor;
-          velocities[i3 + 1] += (repelY + swirlY) * forceFactor;
+          velocities[i3] += repelX * forceFactor;
+          velocities[i3 + 1] += repelY * forceFactor;
           velocities[i3 + 2] += repelZ * forceFactor;
         }
       }
@@ -219,7 +216,7 @@ function Stars3D({ starColors }) {
         />
       </bufferGeometry>
       <pointsMaterial 
-        size={0.3} 
+        size={0.2} 
         vertexColors={true} 
         sizeAttenuation={true}
         transparent={true}
