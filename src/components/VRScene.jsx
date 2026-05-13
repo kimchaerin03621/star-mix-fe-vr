@@ -235,36 +235,13 @@ function Stars3D({ starColors }) {
 }
 
 function VRTestScene() {
-  const [color, setColor] = useState('orange');
-  const boxRef = useRef();
-  const controllers = useXR((state) => state.controllers);
-  
-  useFrame((state) => {
-    const xr = state.gl.xr;
-    const ctrl0 = xr.getController(0);
-    const ctrl1 = xr.getController(1);
-    
-    let count = 0;
-    if (ctrl0 && ctrl0.visible) count++;
-    if (ctrl1 && ctrl1.visible) count++;
-    
-    // Change color based on controller count
-    if (count === 0) {
-      setColor('red'); // No controllers detected
-    } else if (count === 1) {
-      setColor('blue'); // 1 controller detected
-    } else if (count >= 2) {
-      setColor('green'); // 2 controllers detected
-    }
-  });
-  
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[0, 10, 0]} />
-      <mesh ref={boxRef} position={[0, 1.6, -3]}>
+      <mesh position={[0, 1.6, -3]}>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color={color} />
+        <meshStandardMaterial color="orange" />
       </mesh>
     </>
   );
