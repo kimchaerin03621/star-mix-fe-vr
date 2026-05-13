@@ -284,7 +284,6 @@ export function VRScene({ store, starColors, isVRTest }) {
       <Canvas>
         <XR store={store}>
           <LoggerComponent />
-          <IfInSessionMode accept={['immersive-vr']}>
             <color attach="background" args={['#000000']} />
             
             {isVRTest ? (
@@ -294,7 +293,6 @@ export function VRScene({ store, starColors, isVRTest }) {
                 <Stars3D starColors={starColors} />
               </Suspense>
             )}
-          </IfInSessionMode>
         </XR>
       </Canvas>
     </div>
