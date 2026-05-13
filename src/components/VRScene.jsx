@@ -113,20 +113,18 @@ function Stars3D({ starColors }) {
     // Interaction with controllers (Ray interaction)
     let interactionPoints = [];
     
-    // 1. Try library store controllers and check trigger!
-    if (controllers) {
-      const controllerArray = typeof controllers.values === 'function' ? Array.from(controllers.values()) : Object.values(controllers);
-      controllerArray.forEach((c) => {
-        const obj = c.controller || c.grip || c;
-        
-        // Check if trigger is pressed! (Buttons[0] is usually trigger)
-        const isTriggerPressed = c.inputSource?.gamepad?.buttons[0]?.pressed;
-        
-        // TEMPORARY: Disable trigger check to see if tracking works
-        if (obj && obj.position) {
-          interactionPoints.push(obj.position.clone());
-        }
-      });
+    // 1. Try native WebXR controllers via Three.js
+    const xr = state.gl.xr;
+    if (xr && xr.isPresenting) {
+      const ctrl0 = xr.getController(0);
+      const ctrl1 = xr.getController(1);
+      
+      if (ctrl0 && ctrl0.visible) {
+        interactionPoints.push(ctrl0.position.clone());
+      }
+      if (ctrl1 && ctrl1.visible) {
+        interactionPoints.push(ctrl1.position.clone());
+      }
     }
     
     // 2. Add MOUSE interaction for PC testing if mouse is pressed!
