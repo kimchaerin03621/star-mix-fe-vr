@@ -122,7 +122,8 @@ function Stars3D({ starColors }) {
         // Check if trigger is pressed! (Buttons[0] is usually trigger)
         const isTriggerPressed = c.inputSource?.gamepad?.buttons[0]?.pressed;
         
-        if (isTriggerPressed && obj && obj.position) {
+        // TEMPORARY: Disable trigger check to see if tracking works
+        if (obj && obj.position) {
           interactionPoints.push(obj.position.clone());
         }
       });
