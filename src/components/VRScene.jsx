@@ -33,8 +33,8 @@ function Stars3D({ starColors }) {
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      // Distribute stars between 5 and 25 meters
-      const radius = 5 + Math.random() * 20;
+      // Distribute stars between 3.5 and 20 meters (Adjusted closer)
+      const radius = 3.5 + Math.random() * 16.5;
       const phi = Math.random() * Math.PI * 2;
       const theta = Math.acos(2 * Math.random() - 1);
       
@@ -157,7 +157,7 @@ function Stars3D({ starColors }) {
         const dz = sZ - cZ;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         
-        const interactionRadius = 15.0; // Increased radius for distant stars
+        const interactionRadius = 8.0; // Narrowed recognition range
         if (dist < interactionRadius) {
           const forceFactor = Math.pow(1 - dist / interactionRadius, 1.5);
           
