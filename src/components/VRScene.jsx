@@ -19,7 +19,7 @@ function Stars3D({ starColors }) {
   const meshRef = useRef();
   
   // Load star texture
-  const texture = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}star.png`);
+  const texture = useLoader(THREE.TextureLoader, '/star.png');
   
   // Get controllers for interaction
   const controllers = useXR((state) => state.controllers);
@@ -284,19 +284,19 @@ export function VRScene({ store, starColors, isVRTest }) {
       <Canvas>
         <XR store={store}>
           <LoggerComponent />
-            <color attach="background" args={['#010101']} />
+            <color attach="background" args={['#111111']} />
             
             {/* Foolproof way to block passthrough: a giant black sphere */}
-            {/* Use #010101 instead of pure black #000000 because Quest 3 treats pure black as transparent! */}
+            {/* Use #111111 instead of pure black #000000 because Quest 3 treats pure black as transparent! */}
             <mesh scale={[50, 50, 50]}>
               <sphereGeometry args={[1, 32, 32]} />
-              <meshBasicMaterial color="#010101" side={THREE.BackSide} />
+              <meshBasicMaterial color="#111111" side={THREE.BackSide} />
             </mesh>
             
             {isVRTest ? (
               <VRTestScene />
             ) : (
-              <Suspense fallback={null}>
+              <Suspense fallback={<mesh position={[0, 1.6, -2]}><boxGeometry args={[0.2, 0.2, 0.2]} /><meshBasicMaterial color="red" /></mesh>}>
                 <Stars3D starColors={starColors} />
               </Suspense>
             )}
