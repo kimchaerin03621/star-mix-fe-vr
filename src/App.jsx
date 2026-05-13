@@ -12,9 +12,9 @@ const xrStore = createXRStore({
 });
 
 // Workaround for Three.js WebXRManager bug with Emulator
-if (typeof window !== 'undefined') {
-  window.XRWebGLBinding = undefined;
-}
+// if (typeof window !== 'undefined') {
+//   window.XRWebGLBinding = undefined;
+// }
 
 function StarEditor({ onApply, onCancel, previousTexture, previousColors }) {
   const canvasRef = useRef(null);
