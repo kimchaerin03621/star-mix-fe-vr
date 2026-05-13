@@ -286,6 +286,12 @@ export function VRScene({ store, starColors, isVRTest }) {
           <LoggerComponent />
             <color attach="background" args={['#000000']} />
             
+            {/* Foolproof way to block passthrough: a giant black sphere */}
+            <mesh scale={[50, 50, 50]}>
+              <sphereGeometry args={[1, 32, 32]} />
+              <meshBasicMaterial color="#000000" side={THREE.BackSide} />
+            </mesh>
+            
             {isVRTest ? (
               <VRTestScene />
             ) : (
