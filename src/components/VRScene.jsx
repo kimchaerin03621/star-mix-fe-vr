@@ -284,12 +284,13 @@ export function VRScene({ store, starColors, isVRTest }) {
       <Canvas>
         <XR store={store}>
           <LoggerComponent />
-            <color attach="background" args={['#000000']} />
+            <color attach="background" args={['#010101']} />
             
             {/* Foolproof way to block passthrough: a giant black sphere */}
+            {/* Use #010101 instead of pure black #000000 because Quest 3 treats pure black as transparent! */}
             <mesh scale={[50, 50, 50]}>
               <sphereGeometry args={[1, 32, 32]} />
-              <meshBasicMaterial color="#000000" side={THREE.BackSide} />
+              <meshBasicMaterial color="#010101" side={THREE.BackSide} />
             </mesh>
             
             {isVRTest ? (
