@@ -157,14 +157,14 @@ function Stars3D({ starColors }) {
         const dz = sZ - cZ;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         
-        const interactionRadius = 8.0; // Narrowed recognition range
+        const interactionRadius = 10.0; // Slightly larger to reach more stars
         if (dist < interactionRadius) {
-          const forceFactor = Math.pow(1 - dist / interactionRadius, 1.5);
+          const forceFactor = 1 - dist / interactionRadius; // Linear falloff for more movement
           
-          // Pure Repel interaction (No Swirl) - Increased intensity for more speed
-          const repelX = (dx / (dist || 1)) * 0.15;
-          const repelY = (dy / (dist || 1)) * 0.15;
-          const repelZ = (dz / (dist || 1)) * 0.15;
+          // Pure Repel interaction (No Swirl) - Much stronger force
+          const repelX = (dx / (dist || 1)) * 0.5;
+          const repelY = (dy / (dist || 1)) * 0.5;
+          const repelZ = (dz / (dist || 1)) * 0.5;
           
           velocities[i3] += repelX * forceFactor;
           velocities[i3 + 1] += repelY * forceFactor;
