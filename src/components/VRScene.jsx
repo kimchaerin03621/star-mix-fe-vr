@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect, Suspense } from 'react';
+import React, { useRef, useMemo, useEffect, Suspense, useState } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { XR, IfInSessionMode, useXR } from '@react-three/xr';
 import * as THREE from 'three';
@@ -33,8 +33,8 @@ function Stars3D({ starColors }) {
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      // Distribute in a sphere shell - Pushed further away!
-      const radius = 8 + Math.random() * 20; // 8 to 28 meters
+      // Distribute stars between 2 and 15 meters
+      const radius = 2 + Math.random() * 13;
       const phi = Math.random() * Math.PI * 2;
       const theta = Math.acos(2 * Math.random() - 1);
       
@@ -82,6 +82,28 @@ function Stars3D({ starColors }) {
 
   const tempDir = useMemo(() => new THREE.Vector3(), []);
   
+  const isMouseDown = useRef(false);
+  const mouseScreenPos = useRef({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    const onDown = () => { isMouseDown.current = true; };
+    const onUp = () => { isMouseDown.current = false; };
+    const onMove = (e) => {
+      mouseScreenPos.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseScreenPos.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    
+    window.addEventListener('mousedown', onDown);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('mousemove', onMove);
+    
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('mousemove', onMove);
+    };
+  }, []);
+  
   useFrame((state, delta) => {
     const geom = meshRef.current.geometry;
     const posAttr = geom.attributes.position;
@@ -89,82 +111,80 @@ function Stars3D({ starColors }) {
     const time = state.clock.getElapsedTime();
     
     // Interaction with controllers (Ray interaction)
+    let interactionPoints = [];
+    
+    // 1. Try library store controllers and check trigger!
     if (controllers) {
-      const controllerArray = Array.isArray(controllers) 
-        ? controllers 
-        : (typeof controllers.values === 'function' ? Array.from(controllers.values()) : Object.values(controllers));
-        
+      const controllerArray = typeof controllers.values === 'function' ? Array.from(controllers.values()) : Object.values(controllers);
       controllerArray.forEach((c) => {
-        const controllerObj = c.controller;
-        if (!controllerObj) return;
+        const obj = c.controller || c.grip || c;
         
-        const cX = controllerObj.position.x;
-        const cY = controllerObj.position.y;
-        const cZ = controllerObj.position.z;
+        // Check if trigger is pressed! (Buttons[0] is usually trigger)
+        const isTriggerPressed = c.inputSource?.gamepad?.buttons[0]?.pressed;
         
-        // Forward direction is negative Z in Three.js
-        tempDir.set(0, 0, -1).applyQuaternion(controllerObj.quaternion).normalize();
-        const dX = tempDir.x;
-        const dY = tempDir.y;
-        const dZ = tempDir.z;
-        
-        for (let i = 0; i < count; i++) {
-          const i3 = i * 3;
-          const sX = posAttr.array[i3];
-          const sY = posAttr.array[i3 + 1];
-          const sZ = posAttr.array[i3 + 2];
-          
-          // Vector from controller to star
-          const vX = sX - cX;
-          const vY = sY - cY;
-          const vZ = sZ - cZ;
-          
-          // Project onto ray
-          const t = vX * dX + vY * dY + vZ * dZ;
-          
-          if (t > 0) { // Only affect stars in front
-            // Closest point on ray
-            const pX = cX + dX * t;
-            const pY = cY + dY * t;
-            const pZ = cZ + dZ * t;
-            
-            // Distance from star to ray
-            const dx = sX - pX;
-            const dy = sY - pY;
-            const dz = sZ - pZ;
-            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            
-            const interactionRadius = 2.0; // 2 meters around the ray
-            if (dist < interactionRadius) {
-              const forceFactor = Math.pow(1 - dist / interactionRadius, 1.5);
-              
-              // Repel direction: from closest point on ray to star
-              const rX = dx / (dist || 1);
-              const rY = dy / (dist || 1);
-              const rZ = dz / (dist || 1);
-              
-              // Apply velocity (push away from ray)
-              const force = 0.03 * forceFactor;
-              velocities[i3] += rX * force;
-              velocities[i3 + 1] += rY * force;
-              velocities[i3 + 2] += rZ * force;
-            }
-          }
+        if (isTriggerPressed && obj && obj.position) {
+          interactionPoints.push(obj.position.clone());
         }
       });
     }
+    
+    // 2. Add MOUSE interaction for PC testing if mouse is pressed!
+    if (isMouseDown.current) {
+      // Unproject mouse position based on camera to support 360 degrees!
+      const mouse3D = new THREE.Vector3(mouseScreenPos.current.x, mouseScreenPos.current.y, 0.5);
+      mouse3D.unproject(state.camera);
+      
+      const dir = mouse3D.sub(state.camera.position).normalize();
+      const mousePos = state.camera.position.clone().add(dir.multiplyScalar(10)); // 10 meters away
+      
+      interactionPoints.push(mousePos);
+    }
+    
+    // Process all interaction points
+    interactionPoints.forEach((pos) => {
+      const cX = pos.x;
+      const cY = pos.y;
+      const cZ = pos.z;
+      
+      for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        const sX = posAttr.array[i3];
+        const sY = posAttr.array[i3 + 1];
+        const sZ = posAttr.array[i3 + 2];
+        
+        // Distance between controller and star
+        const dx = sX - cX;
+        const dy = sY - cY;
+        const dz = sZ - cZ;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        
+        const interactionRadius = 5.0; // Narrower radius
+        if (dist < interactionRadius) {
+          const forceFactor = Math.pow(1 - dist / interactionRadius, 1.5);
+          
+          // Web page style interaction (Repel + Swirl) - Halved intensity
+          const repelX = (dx / (dist || 1)) * 0.04;
+          const repelY = (dy / (dist || 1)) * 0.04;
+          const repelZ = (dz / (dist || 1)) * 0.04;
+          
+          const swirlX = (-dy / (dist || 1)) * 0.06;
+          const swirlY = (dx / (dist || 1)) * 0.06;
+          
+          velocities[i3] += (repelX + swirlX) * forceFactor;
+          velocities[i3 + 1] += (repelY + swirlY) * forceFactor;
+          velocities[i3 + 2] += repelZ * forceFactor;
+        }
+      }
+    });
     
     // Physics update
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       
-      // Gentle Brownian motion
-      velocities[i3] += Math.sin(time * 2 + i) * 0.0003;
-      velocities[i3 + 1] += Math.cos(time * 2 + i) * 0.0003;
-      velocities[i3 + 2] += Math.sin(time * 3 + i) * 0.0003;
+
       
       // Spring force back to original
-      const springPower = 0.005;
+      const springPower = 0.0002;
       velocities[i3] += (originals[i3] - posAttr.array[i3]) * springPower;
       velocities[i3 + 1] += (originals[i3 + 1] - posAttr.array[i3 + 1]) * springPower;
       velocities[i3 + 2] += (originals[i3 + 2] - posAttr.array[i3 + 2]) * springPower;
@@ -175,9 +195,9 @@ function Stars3D({ starColors }) {
       posAttr.array[i3 + 2] += velocities[i3 + 2];
       
       // Decay velocity
-      velocities[i3] *= 0.95;
-      velocities[i3 + 1] *= 0.95;
-      velocities[i3 + 2] *= 0.95;
+      velocities[i3] *= 0.98;
+      velocities[i3 + 1] *= 0.98;
+      velocities[i3 + 2] *= 0.98;
     }
     
     posAttr.needsUpdate = true;
@@ -200,7 +220,7 @@ function Stars3D({ starColors }) {
         />
       </bufferGeometry>
       <pointsMaterial 
-        size={0.22} 
+        size={0.3} 
         vertexColors={true} 
         sizeAttenuation={true}
         transparent={true}
@@ -208,12 +228,49 @@ function Stars3D({ starColors }) {
         map={texture}
         alphaTest={0.01}
         depthWrite={false}
+        blending={THREE.AdditiveBlending}
       />
     </points>
   );
 }
 
-export function VRScene({ store, starColors }) {
+function VRTestScene() {
+  const [color, setColor] = useState('orange');
+  const boxRef = useRef();
+  const controllers = useXR((state) => state.controllers);
+  
+  useFrame((state) => {
+    const xr = state.gl.xr;
+    const ctrl0 = xr.getController(0);
+    const ctrl1 = xr.getController(1);
+    
+    let count = 0;
+    if (ctrl0 && ctrl0.visible) count++;
+    if (ctrl1 && ctrl1.visible) count++;
+    
+    // Change color based on controller count
+    if (count === 0) {
+      setColor('red'); // No controllers detected
+    } else if (count === 1) {
+      setColor('blue'); // 1 controller detected
+    } else if (count >= 2) {
+      setColor('green'); // 2 controllers detected
+    }
+  });
+  
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[0, 10, 0]} />
+      <mesh ref={boxRef} position={[0, 1.6, -3]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </>
+  );
+}
+
+export function VRScene({ store, starColors, isVRTest }) {
   return (
     <div style={{ 
       position: 'absolute', 
@@ -228,12 +285,15 @@ export function VRScene({ store, starColors }) {
         <XR store={store}>
           <LoggerComponent />
           <IfInSessionMode accept={['immersive-vr']}>
-            {/* Black background to cover the web view in VR */}
             <color attach="background" args={['#000000']} />
             
-            <Suspense fallback={null}>
-              <Stars3D starColors={starColors} />
-            </Suspense>
+            {isVRTest ? (
+              <VRTestScene />
+            ) : (
+              <Suspense fallback={null}>
+                <Stars3D starColors={starColors} />
+              </Suspense>
+            )}
           </IfInSessionMode>
         </XR>
       </Canvas>

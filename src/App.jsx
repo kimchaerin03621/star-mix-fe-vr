@@ -5,7 +5,11 @@ import './index.css';
 import { createXRStore } from '@react-three/xr';
 import { VRScene } from './components/VRScene';
 
-const xrStore = createXRStore({ offerSession: false });
+const xrStore = createXRStore({ 
+  offerSession: false,
+  requiredFeatures: [],
+  optionalFeatures: []
+});
 
 // Workaround for Three.js WebXRManager bug with Emulator
 if (typeof window !== 'undefined') {
@@ -245,6 +249,8 @@ function StarEditor({ onApply, onCancel, previousTexture, previousColors }) {
 function App() {
   const videoRef = useRef(null);
   const [sourceCanvas, setSourceCanvas] = useState(null);
+  const [isVRTest, setIsVRTest] = useState(false);
+  const [isInVR, setIsInVR] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
   const [isMusicLoading, setIsMusicLoading] = useState(false);
@@ -260,6 +266,13 @@ function App() {
   const [starColors, setStarColors] = useState({ left: '#ff007f', right: '#ffffff' });
 
   const handData = useHandTracking(videoRef);
+
+  useEffect(() => {
+    const unsub = xrStore.subscribe((state) => {
+      setIsInVR(!!state.session);
+    });
+    return unsub;
+  }, []);
 
   // Base BPM Map
   const bpmMap = {
@@ -319,13 +332,21 @@ function App() {
 
   return (
     <div className="app-container">
-      <button className="editor-open-btn" onClick={() => setIsEditorOpen(true)}>
-        My Star
-      </button>
+      {!isInVR && (
+        <>
+          <button className="editor-open-btn" onClick={() => setIsEditorOpen(true)}>
+            My Star
+          </button>
 
-      <button className="vr-open-btn" onClick={() => xrStore.enterVR()}>
-        VR Mode
-      </button>
+          <button className="vr-open-btn" onClick={() => { setIsVRTest(false); xrStore.enterVR(); }}>
+            VR Mode
+          </button>
+
+          <button className="vr-open-btn" onClick={() => { setIsVRTest(true); xrStore.enterVR(); }} style={{ left: 'calc(50% + 240px)' }}>
+            VR Test
+          </button>
+        </>
+      )}
 
       {isEditorOpen && (
         <StarEditor
@@ -396,21 +417,23 @@ function App() {
 
       <video ref={videoRef} className="webcam-feed" playsInline muted />
 
-      <Starfield2D
-        handData={isEditorOpen ? [] : handData}
-        isAudioActive={isAudioInitialized}
-        onMusicReady={() => setIsMusicLoading(false)}
-        activePreset={activePreset}
-        activeSong={activeSong}
-        songTrigger={songTrigger}
-        leftRate={leftRate}
-        rightRate={rightRate}
-        customTexture={customTexture}
-        starColors={starColors}
-        onCanvasReady={setSourceCanvas}
-      />
+      {!isInVR && (
+        <Starfield2D
+          handData={isEditorOpen ? [] : handData}
+          isAudioActive={isAudioInitialized}
+          onMusicReady={() => setIsMusicLoading(false)}
+          activePreset={activePreset}
+          activeSong={activeSong}
+          songTrigger={songTrigger}
+          leftRate={leftRate}
+          rightRate={rightRate}
+          customTexture={customTexture}
+          starColors={starColors}
+          onCanvasReady={setSourceCanvas}
+        />
+      )}
 
-      <VRScene store={xrStore} starColors={starColors} />
+      <VRScene store={xrStore} starColors={starColors} isVRTest={isVRTest} />
     </div>
   );
 }
