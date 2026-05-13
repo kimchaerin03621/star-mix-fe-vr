@@ -243,6 +243,46 @@ function VRTestScene() {
   );
 }
 
+function ControllerHelpers() {
+  const ref0 = useRef();
+  const ref1 = useRef();
+  
+  useFrame((state) => {
+    const xr = state.gl.xr;
+    if (xr && xr.isPresenting) {
+      const ctrl0 = xr.getController(0);
+      const ctrl1 = xr.getController(1);
+      
+      if (ctrl0 && ctrl0.visible && ref0.current) {
+        ref0.current.position.copy(ctrl0.position);
+        ref0.current.visible = true;
+      } else if (ref0.current) {
+        ref0.current.visible = false;
+      }
+      
+      if (ctrl1 && ctrl1.visible && ref1.current) {
+        ref1.current.position.copy(ctrl1.position);
+        ref1.current.visible = true;
+      } else if (ref1.current) {
+        ref1.current.visible = false;
+      }
+    }
+  });
+  
+  return (
+    <>
+      <mesh ref={ref0} visible={false}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
+      <mesh ref={ref1} visible={false}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshBasicMaterial color="blue" />
+      </mesh>
+    </>
+  );
+}
+
 export function VRScene({ store, starColors, isVRTest }) {
   return (
     <div style={{ 
@@ -273,6 +313,8 @@ export function VRScene({ store, starColors, isVRTest }) {
                 <Stars3D starColors={starColors} />
               </Suspense>
             )}
+            
+            <ControllerHelpers />
         </XR>
       </Canvas>
     </div>
