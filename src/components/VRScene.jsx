@@ -33,8 +33,8 @@ function Stars3D({ starColors }) {
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      // Distribute stars between 2 and 15 meters
-      const radius = 2 + Math.random() * 13;
+      // Distribute stars between 5 and 25 meters
+      const radius = 5 + Math.random() * 20;
       const phi = Math.random() * Math.PI * 2;
       const theta = Math.acos(2 * Math.random() - 1);
       
@@ -157,14 +157,14 @@ function Stars3D({ starColors }) {
         const dz = sZ - cZ;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         
-        const interactionRadius = 5.0; // Narrower radius
+        const interactionRadius = 15.0; // Increased radius for distant stars
         if (dist < interactionRadius) {
           const forceFactor = Math.pow(1 - dist / interactionRadius, 1.5);
           
-          // Pure Repel interaction (No Swirl) - Increased intensity slightly
-          const repelX = (dx / (dist || 1)) * 0.06;
-          const repelY = (dy / (dist || 1)) * 0.06;
-          const repelZ = (dz / (dist || 1)) * 0.06;
+          // Pure Repel interaction (No Swirl) - Increased intensity for more speed
+          const repelX = (dx / (dist || 1)) * 0.15;
+          const repelY = (dy / (dist || 1)) * 0.15;
+          const repelZ = (dz / (dist || 1)) * 0.15;
           
           velocities[i3] += repelX * forceFactor;
           velocities[i3 + 1] += repelY * forceFactor;
