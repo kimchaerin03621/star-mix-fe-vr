@@ -458,3 +458,82 @@ body {
   border: none;
   box-shadow: 0 0 15px white;
 }
+
+/* Spatial Experiment Button Themes */
+.spatial-open-btn {
+  position: absolute;
+  top: 20px;
+  left: calc(50% + 400px);
+  background: rgba(0, 255, 204, 0.15);
+  border: 2px solid #00ffcc;
+  color: #00ffcc;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+.spatial-open-btn:hover {
+  background: #00ffcc;
+  color: black;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+  transform: translateY(-1px);
+}
+
+.experiment-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 190px;
+  background: rgba(255, 0, 127, 0.15);
+  border: 2px solid #ff007f;
+  color: #ff007f;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+}
+
+.experiment-close-btn:hover {
+  background: #ff007f;
+  color: white;
+  box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
+  transform: translateY(-1px);
+}
+
+.spatial-experiment-theme {
+  background: #050510; /* Extra deep dark theme for experiment space */
+}
+
+.experiment-title {
+  background: linear-gradient(to right, #00ffcc, #ffffff) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+}
+
+.experiment-btn {
+  border-color: rgba(0, 255, 204, 0.2) !important;
+  color: rgba(0, 255, 204, 0.6) !important;
+  background: rgba(0, 255, 204, 0.05) !important;
+}
+
+.experiment-btn.active {
+  background: rgba(0, 255, 204, 0.3) !important;
+  border-color: rgba(0, 255, 204, 0.8) !important;
+  color: white !important;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.3) !important;
+}
+
+.experiment-btn:hover:not(.active) {
+  background: rgba(0, 255, 204, 0.1) !important;
+  color: white !important;
+}
+

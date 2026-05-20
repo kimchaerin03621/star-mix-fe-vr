@@ -4,6 +4,7 @@ import { Starfield2D } from './components/Experience';
 import './index.css';
 import { createXRStore } from '@react-three/xr';
 import { VRScene } from './components/VRScene';
+import { SpatialExperiment } from './components/SpatialExperiment';
 
 const xrStore = createXRStore({ 
   offerSession: false,
@@ -264,6 +265,7 @@ function App() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [customTexture, setCustomTexture] = useState(null);
   const [starColors, setStarColors] = useState({ left: '#ff007f', right: '#ffffff' });
+  const [viewMode, setViewMode] = useState('main'); // 'main' | 'spatial-experiment'
 
   const handData = useHandTracking(videoRef);
 
@@ -330,6 +332,29 @@ function App() {
     setIsEditorOpen(false);
   };
 
+  const handleEnterVR = async (isTest = false) => {
+    setIsVRTest(isTest);
+    if (typeof navigator !== 'undefined' && navigator.xr) {
+      try {
+        const isSupported = await navigator.xr.isSessionSupported('immersive-vr');
+        if (isSupported) {
+          await xrStore.enterVR();
+        } else {
+          alert("VR 기기를 연결해주세요.");
+        }
+      } catch (err) {
+        console.error("WebXR session check error:", err);
+        alert("VR 기기를 연결해주세요.");
+      }
+    } else {
+      alert("VR 기기를 연결해주세요.");
+    }
+  };
+
+  if (viewMode === 'spatial-experiment') {
+    return <SpatialExperiment onBack={() => setViewMode('main')} />;
+  }
+
   return (
     <div className="app-container">
       {!isInVR && (
@@ -338,12 +363,16 @@ function App() {
             My Star
           </button>
 
-          <button className="vr-open-btn" onClick={() => { setIsVRTest(false); xrStore.enterVR(); }}>
+          <button className="vr-open-btn" onClick={() => handleEnterVR(false)}>
             VR Mode
           </button>
 
-          <button className="vr-open-btn" onClick={() => { setIsVRTest(true); xrStore.enterVR(); }} style={{ left: 'calc(50% + 240px)' }}>
+          <button className="vr-open-btn" onClick={() => handleEnterVR(true)} style={{ left: 'calc(50% + 240px)' }}>
             VR Test
+          </button>
+
+          <button className="spatial-open-btn" onClick={() => setViewMode('spatial-experiment')} style={{ left: 'calc(50% + 400px)' }}>
+            공간음향
           </button>
         </>
       )}
@@ -433,7 +462,7 @@ function App() {
         />
       )}
 
-      <VRScene store={xrStore} starColors={starColors} isVRTest={isVRTest} />
+      <VRScene store={xrStore} starColors={starColors} isVRTest={isVRTest} isInVR={isInVR} />
     </div>
   );
 }

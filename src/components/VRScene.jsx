@@ -283,7 +283,7 @@ function ControllerHelpers() {
   );
 }
 
-export function VRScene({ store, starColors, isVRTest }) {
+export function VRScene({ store, starColors, isVRTest, isInVR }) {
   return (
     <div style={{ 
       position: 'absolute', 
@@ -292,7 +292,8 @@ export function VRScene({ store, starColors, isVRTest }) {
       width: '100vw', 
       height: '100vh', 
       pointerEvents: 'none',
-      zIndex: 1 
+      zIndex: 1,
+      display: isInVR ? 'block' : 'none'
     }}>
       <Canvas>
         <XR store={store}>
