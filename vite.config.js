@@ -1,11 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
-  plugins: [react()],
+  plugins: [
+    react(),
+    basicSsl()
+  ],
   resolve: {
     dedupe: ['three']
+  },
+  server: {
+    host: true,
+    https: true
   }
 })
